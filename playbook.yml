@@ -1,0 +1,61 @@
+---
+- remote_user: ubuntu
+- name: Manage Docker container lifecycle on EC2
+  hosts: all
+  become: yes
+  vars:
+    docker_image: "containerguru1/wed-proj-1"  # Docker image name
+    docker_tag: "latest"  # Tag of the Docker image
+    container_name: "wed-proj-1"  # Name of the container
+
+  tasks:
+    
+    - name: Ensure Docker is installed
+      package:
+        name: docker.io
+        state: present
+
+    - name: Ensure Docker service is started
+      service:
+        name: docker
+        state: started
+        enabled: true
+
+    - name: Log in to Docker Hub
+      docker_login:
+        username: "containerguru1"  # Replace with your Docker Hub username
+        password: "Madmithra!27"  # Replace with your Docker Hub password
+
+    - name: Stop the running container (if any)
+      docker_container:
+        name: "{{ container_name }}"
+        state: stopped
+      ignore_errors: true  # Ignore if the container is not running
+
+    - name: Remove the stopped container (if any)
+      docker_container:
+        name: "{{ container_name }}"
+        state: absent
+      ignore_errors: true  # Ignore if the container does not exist
+
+    - name: Remove the existing Docker image
+      docker_image:
+        name: "{{ docker_image }}"
+        tag: "{{ docker_tag }}"
+        state: absent
+      ignore_errors: true  # Ignore if the image does not exist
+
+    - name: Pull the Docker image from Docker Hub
+      docker_image:
+        name: "{{ docker_image }}"
+        tag: "{{ docker_tag }}"
+        source: pull
+
+    - name: Start the Docker container with the new image
+      docker_container:
+        name: "{{ container_name }}"
+        image: "{{ docker_image }}:{{ docker_tag }}"
+        state: started
+        restart_policy: always
+        published_ports:
+          - "80:80"  # Change this if necessary
