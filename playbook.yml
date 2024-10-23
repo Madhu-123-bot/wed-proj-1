@@ -1,15 +1,14 @@
 ---
-- remote_user: ubuntu
-- name: Manage Docker container lifecycle on EC2
-  hosts: all
-  become: yes
+- hosts: all  # Define target hosts
+  remote_user: ubuntu  # Define the user to connect to the remote hosts
+  become: yes  # Use sudo privileges
+
   vars:
-    docker_image: "containerguru1/wed-proj-1"  # Docker image name
-    docker_tag: "latest"  # Tag of the Docker image
-    container_name: "wed-proj-1"  # Name of the container
+    docker_image: "containerguru1/wed-proj-1"
+    docker_tag: "latest"
+    container_name: "wed-proj-1"
 
   tasks:
-    
     - name: Ensure Docker is installed
       package:
         name: docker.io
@@ -23,27 +22,27 @@
 
     - name: Log in to Docker Hub
       docker_login:
-        username: "containerguru1"  # Replace with your Docker Hub username
-        password: "Madmithra!27"  # Replace with your Docker Hub password
+        username: "containerguru1"
+        password: "Madmithra!27"
 
     - name: Stop the running container (if any)
       docker_container:
         name: "{{ container_name }}"
         state: stopped
-      ignore_errors: true  # Ignore if the container is not running
+      ignore_errors: true
 
     - name: Remove the stopped container (if any)
       docker_container:
         name: "{{ container_name }}"
         state: absent
-      ignore_errors: true  # Ignore if the container does not exist
+      ignore_errors: true
 
     - name: Remove the existing Docker image
       docker_image:
         name: "{{ docker_image }}"
         tag: "{{ docker_tag }}"
         state: absent
-      ignore_errors: true  # Ignore if the image does not exist
+      ignore_errors: true
 
     - name: Pull the Docker image from Docker Hub
       docker_image:
@@ -58,4 +57,4 @@
         state: started
         restart_policy: always
         published_ports:
-          - "80:80"  # Change this if necessary
+          - "80:80"
