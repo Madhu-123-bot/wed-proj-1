@@ -49,16 +49,6 @@ pipeline {
   }
 
   post {
-    always {
-      script {
-        try {
-          // Remove Docker image
-          docker.image('containerguru1/wed-proj-1').remove()
-        } catch (Exception e) {
-          echo "Image cleanup failed: ${e.getMessage()}"
-        }
-      }
-    }
     failure {
       echo "Pipeline failed!"
     }
